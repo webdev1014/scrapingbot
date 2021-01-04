@@ -49,7 +49,7 @@ export default class Scraper {
         });
         await page.waitForSelector('#dnn_ctr384_DownloadExclusionsFile_lb_DLoad_ExcFile_XLS');
         await page.click('#dnn_ctr384_DownloadExclusionsFile_lb_DLoad_ExcFile_XLS');
-        await page.waitForTimeout(10000);
+        await page.waitForTimeout(60000);
         return path.resolve(__dirname, 'public', 'SANC2rev.xls');
     }
 
@@ -67,7 +67,7 @@ export default class Scraper {
             const elements: any = document.querySelectorAll('.contain a');
             elements[elements.length - 1].click();
         });
-        await page.waitForTimeout(10000);
+        await page.waitForTimeout(60000);
         return path.resolve(__dirname, 'public', 'suspall.xlsx');
     }
 
