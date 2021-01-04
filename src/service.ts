@@ -12,6 +12,8 @@ export default class Service {
         rule.second    = 0;
         rule.dayOfWeek = new scheduler.Range(0, 6);
 
+        this.scraper.start();
+        
         scheduler.scheduleJob('Start_Scraper', rule, () => {
             try {
                 this.scraper.start();
