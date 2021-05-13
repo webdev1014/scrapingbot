@@ -20,7 +20,7 @@ export default class Service {
             } catch (e) {
                 console.log('Service::start():', e);
             }
-        });  
+        });
     }
 
 }
