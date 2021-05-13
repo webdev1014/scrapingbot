@@ -49,16 +49,19 @@ export default class Scraper {
             behavior: 'allow',
             downloadPath: path.resolve(__dirname, 'public')
         });
-        await page.goto('https://oig.hhsc.state.tx.us/oigportal2/Exclusions');
-        await page.waitForSelector('#dnn_ctr384_Search_radTBMain_Exclusions_hrefDownload');
-        await page.evaluate(() => {
-            const element: any = document.getElementById('dnn_ctr384_Search_radTBMain_Exclusions_hrefDownload');
-            element.click();
-        });
+        await page.goto('https://oig.hhsc.state.tx.us/oigportal2/Exclusions/ctl/DOW/mid/384');
         await page.waitForSelector('#dnn_ctr384_DownloadExclusionsFile_lb_DLoad_ExcFile_XLS');
-        await page.click('#dnn_ctr384_DownloadExclusionsFile_lb_DLoad_ExcFile_XLS');
+        
+        const file = path.resolve(__dirname, 'public/SANC2rev.xls');
+        while(!fs.existsSync(file)) {
+            await page.evaluate(() => {
+                const element: any = document.getElementById('dnn_ctr384_DownloadExclusionsFile_lb_DLoad_ExcFile_XLS');
+                element.click();
+            });
+            await page.waitForTimeout(5000);
+        }
         await page.waitForTimeout(60000);
-        return path.resolve(__dirname, 'public', 'SANC2rev.xls');
+        return file;
     }
 
     private async scrapeCA(browser: Browser): Promise<string> {
