@@ -21,7 +21,7 @@ export default class Scraper {
         args: [
             '--no-sandbox',
         ],
-        headless: false,
+        headless: true,
     };
 
 
@@ -97,7 +97,7 @@ export default class Scraper {
         await page.evaluate(() => {
             window.open('https://oig.hhs.gov/exclusions/downloadables/UPDATED.csv');
         });
-        await page.waitForTimeout(80000);
+        await page.waitForTimeout(60000);
         return path.resolve(__dirname, 'public/UPDATED.csv');
     }
 
