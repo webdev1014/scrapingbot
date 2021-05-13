@@ -38,6 +38,9 @@ export default class Scraper {
         this.createJSONFile(filePath, path.resolve(__dirname, 'public', 'ca.json'));
         this.v1.createCaJson(filePath);
 
+        filePath = await this.scrapeFederal(browser);
+        this.v1.createFederalJson(filePath);
+
         browser.close();
     }
 
@@ -79,7 +82,23 @@ export default class Scraper {
             elements[elements.length - 1].click();
         });
         await page.waitForTimeout(60000);
-        return path.resolve(__dirname, 'public', 'suspall.xlsx');
+        return path.resolve(__dirname, 'public/suspall.xlsx');
+    }
+
+    private async scrapeFederal(browser: Browser): Promise<string> {
+        const page = await browser.newPage();
+        const client = await page.target().createCDPSession();
+
+        await client.send('Page.setDownloadBehavior', {
+            behavior: 'allow',
+            downloadPath: path.resolve(__dirname, 'public')
+        });
+        await page.goto('https://oig.hhs.gov/exclusions/exclusions_list.asp');
+        await page.evaluate(() => {
+            window.open('https://oig.hhs.gov/exclusions/downloadables/UPDATED.csv');
+        });
+        await page.waitForTimeout(80000);
+        return path.resolve(__dirname, 'public/UPDATED.csv');
     }
 
     private createJSONFile(input: string, output: string) {
