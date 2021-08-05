@@ -41,6 +41,9 @@ export default class Scraper {
         filePath = await this.scrapeFederal(browser);
         this.v1.createFederalJson(filePath);
 
+        filePath = await this.scrapeSAM(browser);
+        await this.v1.createSamJson(filePath);
+
         browser.close();
     }
 
@@ -99,6 +102,42 @@ export default class Scraper {
         });
         await page.waitForTimeout(60000);
         return path.resolve(__dirname, 'public/UPDATED.csv');
+    }
+
+    private async scrapeSAM(browser: Browser): Promise<string> {
+        const page = await browser.newPage();
+        const client = await page.target().createCDPSession();
+
+        await client.send('Page.setDownloadBehavior', {
+            behavior: 'allow',
+            downloadPath: path.resolve(__dirname, 'public')
+        });
+        await page.goto('https://sam.gov/data-services/Exclusions/Public%20V2?privacy=Public');
+        await page.waitForSelector('.sds-dialog-actions .usa-button');
+        await page.click('.sds-dialog-actions .usa-button');
+        await page.waitForSelector('.usa-width-one-whole .data-service-entry');
+
+        const fileName = await page.evaluate(async () => {
+            const link: any = document.querySelector('.usa-width-one-whole .data-service-entry .data-service-file-link');
+            link.removeChild(link.querySelector('i'));
+            link.removeChild(link.querySelector('span'));
+
+            const fileName = link.textContent.trim().split('.')[0] + '.zip';
+            link.click();
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            document.querySelectorAll('.input-toggle.ng-pristine').forEach((check: any) => {
+                check.click();
+            });
+
+            const btn:any = document.querySelector('.usa-modal-content-submit-btn button');
+            btn.click();
+
+            return fileName;
+        });
+
+        await page.waitForTimeout(60000);
+        return path.resolve(__dirname, `public/${fileName}`);
     }
 
     private createJSONFile(input: string, output: string) {
